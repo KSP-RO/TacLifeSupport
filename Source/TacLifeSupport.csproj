@@ -34,7 +34,16 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSP)\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\KSP 1.1.2 Tests\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPAssets">
+      <HintPath>..\..\..\..\Desktop\KSP 1.1.2 Tests\KSP_Data\Managed\KSPAssets.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPCore">
+      <HintPath>..\..\..\..\Desktop\KSP 1.1.2 Tests\KSP_Data\Managed\KSPCore.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPUtil">
+      <HintPath>..\..\..\..\Desktop\KSP 1.1.2 Tests\KSP_Data\Managed\KSPUtil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -44,7 +53,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(KSP)\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\KSP 1.1.2 Tests\KSP_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\Desktop\KSP 1.1.2 Tests\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -108,7 +120,8 @@
     <!-- Needed for the WriteAvcVersion build target -->
     <ModName>TAC Life Support</ModName>
     <ModUrl>http://ksp-avc.cybutek.net/version.php?id=9</ModUrl>
-    <DownloadUrl></DownloadUrl>
+    <DownloadUrl>
+    </DownloadUrl>
     <KspVersionMajor>1</KspVersionMajor>
     <KspVersionMinor>0</KspVersionMinor>
     <KspVersionPatch>5</KspVersionPatch>
