@@ -165,6 +165,13 @@
       <GitStatus Condition="$(GitStatusCheck2) != ''">with modifications</GitStatus>
     </PropertyGroup>
   </Target>
+  <Target Name="GitInfoUnix">
+    <PropertyGroup>
+      <GitSHA>d3adb33f</GitSHA>
+      <GitSHA2>d3adb33f</GitSHA2>
+      <GitStatus>unknown</GitStatus>
+    </PropertyGroup>
+  </Target>
   <Target Name="PostBuildMacros">
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
       <Output TaskParameter="Assemblies" ItemName="Targets" />
@@ -180,10 +187,16 @@
     <!--<Message Text="Built version = $(MaxAssemblyFileVersion)" Importance="high" /> -->
     <Message Text="Built version = $(VersionNum)" Importance="high" />
     <!-- Copy the dll to the GameData directory -->
-    <MakeDir Directories="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\" />
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\" />
-    <CallTarget Targets="WriteVersionFile" />
-    <CallTarget Targets="WriteAvcVersion" Condition="$(ModUrl) != ''" />
+    <!-- MonoDevelop/xbuild fail because of ProjectName going AWOL, so set manually. -->
+    <PropertyGroup>
+      <ProjectName Condition=" '$(ProjectName)' == '' ">TacLifeSupport</ProjectName>
+    </PropertyGroup>
+    <MakeDir Directories="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\Plugins\" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\Plugins\" />
+    <CallTarget Targets="WriteVersionFile" Condition="'$(OS)' == 'Windows_NT'" />
+    <CallTarget Targets="WriteAvcVersion" Condition="'$(OS)' == 'Windows_NT' AND $(ModUrl) != ''" />
+    <CallTarget Targets="WriteVersionFileUnix" Condition="'$(OS)' == 'Unix'" />
+    <CallTarget Targets="WriteAvcVersionUnix" Condition="'$(OS)' == 'Unix' AND $(ModUrl) != ''" />
     <CallTarget Targets="CopyToTest" />
   </Target>
   <Target Name="WriteVersionFile">
@@ -198,21 +211,53 @@
     <!-- Write the .version file for KSP-AVC, http://forum.kerbalspaceprogram.com/threads/79745 -->
     <Message Text="Writing AVC version file" Importance="high" />
     <PropertyGroup>
-      <AVCFile>$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\$(ProjectName).version</AVCFile>
+      <AVCFile>$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\Plugins\$(ProjectName).version</AVCFile>
     </PropertyGroup>
     <Delete Files="$(AVCFile)" />
     <WriteLinesToFile File="$(AVCFile)" Lines="{&#xD;&#xA;  &quot;NAME&quot;: &quot;$(ModName)&quot;,&#xD;&#xA;  &quot;URL&quot;: &quot;$(ModUrl)&quot;,&#xD;&#xA;  &quot;DOWNLOAD&quot;: &quot;$(DownloadUrl)&quot;,&#xD;&#xA;  &quot;CHANGE_LOG_URL&quot;: &quot;$(ChangelogUrl)&quot;,&#xD;&#xA;  &quot;VERSION&quot;: &quot;$(VersionNum)&quot;,&#xD;&#xA;  &quot;KSP_VERSION&quot;: {&#xD;&#xA;    &quot;MAJOR&quot;: $(KspVersionMajor),&#xD;&#xA;    &quot;MINOR&quot;: $(KspVersionMinor),&#xD;&#xA;    &quot;PATCH&quot;: $(KspVersionPatch)&#xD;&#xA;  },&#xD;&#xA;  &quot;KSP_VERSION_MIN&quot;: {&#xD;&#xA;    &quot;MAJOR&quot;: $(KspMinVersionMajor),&#xD;&#xA;    &quot;MINOR&quot;: $(KspMinVersionMinor),&#xD;&#xA;    &quot;PATCH&quot;: $(KspMinVersionPatch)&#xD;&#xA;  },&#xD;&#xA;  &quot;KSP_VERSION_MAX&quot;: {&#xD;&#xA;    &quot;MAJOR&quot;: $(KspMaxVersionMajor),&#xD;&#xA;    &quot;MINOR&quot;: $(KspMaxVersionMinor),&#xD;&#xA;    &quot;PATCH&quot;: $(KspMaxVersionPatch)&#xD;&#xA;  }&#xD;&#xA;}" Overwrite="true" Encoding="UTF-8" />
-    <Copy SourceFiles="$(BaseDir)\TacLib\AVC\MiniAVC.dll" DestinationFolder="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\" />
+    <Copy SourceFiles="$(BaseDir)\TacLib\AVC\MiniAVC.dll" DestinationFolder="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\Plugins\" />
+    <Message Text="Writing AVC version file complete." Importance="high" />
+  </Target>
+  <Target Name="WriteVersionFileUnix">
+    <!-- Needs a separate target - xbuild doesn't support 'Encoding' -->
+    <!-- MonoDevelop/xbuild fail because of ProjectName going AWOL, so set manually. -->
+    <PropertyGroup>
+      <ProjectName Condition=" '$(ProjectName)' == '' ">TacLifeSupport</ProjectName>
+    </PropertyGroup>
+    <ItemGroup>
+      <OldVersionFiles Include="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)_*.txt" />
+    </ItemGroup>
+    <Delete Files="@(OldVersionFiles)" />
+    <WriteLinesToFile File="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)_v$(VersionNum).txt" Lines="You have installed the $(ModName), version $(VersionNum) ($(GitSHA)+$(GitSHA2) $(GitStatus)).&#xD;&#xA;&#xD;&#xA;See the Readme.txt and LICENSE.txt files for more information." Overwrite="true" />
+  </Target>
+  <Target Name="WriteAvcVersionUnix">
+    <!-- Write the .version file for KSP-AVC, http://forum.kerbalspaceprogram.com/threads/79745 -->
+    <!-- MonoDevelop/xbuild fail because of ProjectName going AWOL, so set manually. -->
+    <PropertyGroup>
+      <ProjectName Condition=" '$(ProjectName)' == '' ">TacLifeSupport</ProjectName>
+    </PropertyGroup>
+    <Message Text="Writing AVC version file" Importance="high" />
+    <PropertyGroup>
+      <AVCFile>$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\Plugins\$(ProjectName).version</AVCFile>
+    </PropertyGroup>
+    <Delete Files="$(AVCFile)" />
+    <WriteLinesToFile File="$(AVCFile)" Lines="{&#xD;&#xA;  &quot;NAME&quot;: &quot;$(ModName)&quot;,&#xD;&#xA;  &quot;URL&quot;: &quot;$(ModUrl)&quot;,&#xD;&#xA;  &quot;DOWNLOAD&quot;: &quot;$(DownloadUrl)&quot;,&#xD;&#xA;  &quot;CHANGE_LOG_URL&quot;: &quot;$(ChangelogUrl)&quot;,&#xD;&#xA;  &quot;VERSION&quot;: &quot;$(VersionNum)&quot;,&#xD;&#xA;  &quot;KSP_VERSION&quot;: {&#xD;&#xA;    &quot;MAJOR&quot;: $(KspVersionMajor),&#xD;&#xA;    &quot;MINOR&quot;: $(KspVersionMinor),&#xD;&#xA;    &quot;PATCH&quot;: $(KspVersionPatch)&#xD;&#xA;  },&#xD;&#xA;  &quot;KSP_VERSION_MIN&quot;: {&#xD;&#xA;    &quot;MAJOR&quot;: $(KspMinVersionMajor),&#xD;&#xA;    &quot;MINOR&quot;: $(KspMinVersionMinor),&#xD;&#xA;    &quot;PATCH&quot;: $(KspMinVersionPatch)&#xD;&#xA;  },&#xD;&#xA;  &quot;KSP_VERSION_MAX&quot;: {&#xD;&#xA;    &quot;MAJOR&quot;: $(KspMaxVersionMajor),&#xD;&#xA;    &quot;MINOR&quot;: $(KspMaxVersionMinor),&#xD;&#xA;    &quot;PATCH&quot;: $(KspMaxVersionPatch)&#xD;&#xA;  }&#xD;&#xA;}" Overwrite="true" />
+    <Copy SourceFiles="$(BaseDir)\TacLib\AVC\MiniAVC.dll" DestinationFolder="$(BaseDir)\GameData\ThunderAerospace\$(ProjectName)\Plugins\" />
     <Message Text="Writing AVC version file complete." Importance="high" />
   </Target>
   <Target Name="CopyToTest">
     <!-- Copy to the test directory -->
+    <!-- MonoDevelop/xbuild fail because of ProjectName going AWOL, so set manually. -->
+    <PropertyGroup>
+      <ProjectName Condition=" '$(ProjectName)' == '' ">TacLifeSupport</ProjectName>
+    </PropertyGroup>
     <Warning Condition="'$(KSP_TEST)' == ''" Text="The environment variable KSP_TEST is not set!" />
     <Message Text="Execute Test Debug mode commands" Importance="high" />
-    <Exec Command="$(ProjectDir)packages\Mono.Unofficial.pdb2mdb.4.2.3.4\tools\pdb2mdb.exe $(TargetFileName)" WorkingDirectory="$(TargetDir)" IgnoreExitCode="true" Condition="'$(KSP_TEST)' != ''" />
-    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(KSP_TEST)\GameData\ThunderAerospace\TacLifeSupport\" Condition="'$(KSP_TEST)' != ''" />
-    <Copy SourceFiles="$(TargetDir)$(TargetName).dll.mdb" DestinationFolder="$(KSP_TEST)\GameData\ThunderAerospace\TacLifeSupport\" Condition="'$(KSP_TEST)' != ''" />
-    <Exec Command="test.bat" WorkingDirectory="$(BaseDir)\" IgnoreExitCode="true" Condition="'$(KSP_TEST)' != ''" />
+    <Exec Command="$(ProjectDir)packages\Mono.Unofficial.pdb2mdb.4.2.3.4\tools\pdb2mdb.exe $(TargetFileName)" WorkingDirectory="$(TargetDir)" IgnoreExitCode="true" Condition="'$(KSP_TEST)' != '' AND '$(OS)' == 'Windows_NT'" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(KSP_TEST)\GameData\ThunderAerospace\$(ProjectName)\Plugins\" Condition="'$(KSP_TEST)' != '' AND '$(OS)' == 'Windows_NT'" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).dll.mdb" DestinationFolder="$(KSP_TEST)\GameData\ThunderAerospace\$(ProjectName)\Plugins\" Condition="'$(KSP_TEST)' != ''" />
+    <Exec Command="test.bat" WorkingDirectory="$(BaseDir)\" IgnoreExitCode="true" Condition="'$(KSP_TEST)' != '' AND '$(OS)' == 'Windows_NT'" />
+    <Exec Command="$(BaseDir)\test.sh" WorkingDirectory="$(BaseDir)\" IgnoreExitCode="true" Condition="'$(KSP_TEST)' != '' AND '$(OS)' == 'Unix'" />
     <Message Text="Execute Test Debug mode commands complete." Importance="high" />
   </Target>
   <Target Name="Package" Condition="'$(Configuration)' == 'Release'">
@@ -245,9 +290,9 @@
     <Exec Command="$(PostBuildEvent)" />
     <Message Text="Distribution Zip file created" />
   </Target>
-  
   <Target Name="BeforeBuild">
-    <CallTarget Targets="GitInfo" />
+    <CallTarget Targets="GitInfo" Condition="'$(OS)' == 'Windows_NT'" />
+    <CallTarget Targets="GitInfoUnix" Condition="'$(OS)' == 'Unix'" />
   </Target>
   <Target Name="AfterBuild">
     <PropertyGroup>

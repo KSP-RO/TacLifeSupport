@@ -9,7 +9,7 @@ namespace Tac
     [KSPAddon(KSPAddon.Startup.SpaceCentre, true)]
     public class TACEditorFilter : MonoBehaviour
     {
-        // This class ass a Filter Icon to the Editor to show TACLS Parts
+        // This class adds a Filter Icon to the Editor to show TAC-LS Parts.
         private static List<AvailablePart> TacavPartItems = new List<AvailablePart>();
         public static TACEditorFilter Instance;
         internal string category = "Filter by Function";
@@ -90,7 +90,8 @@ namespace Tac
             foreach (AvailablePart avPart in PartLoader.LoadedPartsList)
             {
                 if (!avPart.partPrefab) continue;
-                if (avPart.name.Contains("Tac") || avPart.name.Contains("HexCan"))
+                if ((avPart.name.Contains("Tac") || avPart.name.Contains("HexCan")) &&
+                    (avPart.TechRequired != "hidden" || avPart.category.ToString() != "-1" ))
                 {
                     TacavPartItems.Add(avPart);
                 }
