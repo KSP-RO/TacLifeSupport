@@ -1298,9 +1298,9 @@ namespace Tac
                             {
                                 HibernateCrewMembers(vessel, vesselInfo, "EC");
                             }
+                            vesselInfo.lastElectricity += UnityEngine.Random.Range(500, 2000);
+                            vesselInfo.lastElectricity = Math.Min(vesselInfo.lastElectricity, currentTime);
                         }
-                        vesselInfo.lastElectricity += UnityEngine.Random.Range(500, 2000);
-                        vesselInfo.lastElectricity = Math.Min(vesselInfo.lastElectricity, currentTime);
                     }
                     else //We are out of EC, but we can open the windows. so put that in the GUI
                     {
